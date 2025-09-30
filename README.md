@@ -1,0 +1,3 @@
+# Laravel Chat-app
+
+Este proyecto es una práctica de desarrollo de un chat en tiempo real, aunque no es una app que es netamente chat, sino que tiene una sección de chat es como un agregado, pero el proyecto en general es el starter kid de la Laravel y le agregue la sección de chat, el momento en el que hago este commit solo es eso, en el paso del tiempo veré que se me ocurre o veo en otro lugar y las añado.
