@@ -40,6 +40,7 @@ class MessageSent implements ShouldBroadcast
             "user_id" => $this->autor->id,
             "user_name" => $this->autor->name,
             "message" => $this->message->mensaje,
+            "files" => $this->message->archivo_mensaje,
             "date" => $this->message->created_at->format('dmY'),
             "time" => $this->message->created_at->format('h:i a')
         ];

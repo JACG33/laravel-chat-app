@@ -10,6 +10,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 
 class ChatController extends Controller
 {
@@ -140,10 +142,14 @@ class ChatController extends Controller
 
     function conversacion(Request $request)
     {
-        $id_chat = $request->id_chat;
-        $mensajes = Mensajes::where('id_chat', "$id_chat")->orderBy('created_at', 'desc')->paginate(30);
+        $chat = Chat::where('id', "$request->id_chat")->get()->first();
+        if (empty($chat))
+            return redirect()->route('chat.index');
 
-        return view('chat.conversacion.index', compact('mensajes', 'id_chat'));
+        // Buscar los ultimos mensajes del chat
+        $mensajes = Mensajes::with('getUser')->where('id_chat', "$chat->id")->orderBy('created_at')->paginate(30);
+
+        return view('chat.conversacion.index', compact('mensajes', 'chat'));
     }
 
     function sendMessage(Request $request)
@@ -154,15 +160,41 @@ class ChatController extends Controller
         $message = $request->input('message');
         $id_chat = $request->id_chat;
 
+        $files_list = [];
+        if ($request->file()) {
+            foreach ($request->file('file') as $key) {
+                $nombre_archivo = time() . '-' . $key->getClientOriginalName();
+                $files_list[] = $this->uploadFilesChat($key, $nombre_archivo);
+            }
+        }
+
+        $files_list = implode(',', $files_list);
+
         $mensaje = Mensajes::create([
             'id_chat' => $id_chat,
             'id_usuario' => Auth::user()->id,
             'mensaje' => $message,
             'tipo_mensaje' => $message,
+            'archivo_mensaje' => $files_list
         ]);
 
         event(new MessageSent($user, $mensaje));
 
         return response()->json(['status' => 'Message sent!']);
+    }
+
+
+    private function uploadFilesChat($file, $nombre_archivo)
+    {
+
+        $ruta = storage_path('app/public/chat_files');
+        // Crear el directorio si no existe
+        if (!File::exists($ruta)) {
+            File::makeDirectory($ruta, 0777, true, true);
+        }
+
+        // Subir el archivo
+        $path_file = $file->storeAs('chat_files', $nombre_archivo, 'public');
+        return $path_file;
     }
 }

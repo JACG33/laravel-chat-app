@@ -58,4 +58,11 @@ class User extends Authenticatable
             ->map(fn ($word) => Str::substr($word, 0, 1))
             ->implode('');
     }
+
+    /**
+     * Relacion Usuario Mensajes
+     */
+    function getMessages() {
+        return $this->hasMany(Mensajes::class,'id_usuario');
+    }
 }

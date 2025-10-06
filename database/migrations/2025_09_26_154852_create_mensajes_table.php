@@ -12,11 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('mensajes', function (Blueprint $table) {
+            $table->unsignedBigInteger('id_usuario');
+
             $table->id();
             $table->integer('id_chat')->isNotEmpty();
-            $table->integer('id_usuario')->isNotEmpty();
+            $table->foreign('id_usuario')->references('id')->on('users');
             $table->longText('mensaje')->isNotEmpty();
-            $table->string('tipo_mensaje',50)->isNotEmpty();
+            $table->string('tipo_mensaje', 50)->isNotEmpty();
+            $table->longText('archivo_mensaje')->nullable();
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
         });

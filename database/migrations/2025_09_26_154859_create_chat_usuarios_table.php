@@ -12,9 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('chat_usuarios', function (Blueprint $table) {
+            $table->unsignedBigInteger('id_usuario');
+            $table->unsignedBigInteger('id_chat');
+            
             $table->id();
-            $table->integer('id_chat')->isNotEmpty();
-            $table->integer('id_usuario')->isNotEmpty();
+            $table->foreign('id_chat')->references('id')->on('chats');
+            $table->foreign('id_usuario')->references('id')->on('users');
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
         });
