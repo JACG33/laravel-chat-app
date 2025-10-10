@@ -142,19 +142,54 @@ class ChatController extends Controller
 
     function conversacion(Request $request)
     {
-        $chat = Chat::where('id', "$request->id_chat")->get()->first();
+
+        $chat = DB::table('chats')
+            ->leftJoin('chat_usuarios', 'chat_usuarios.id_chat', 'chats.id')
+            ->where('chats.id', "$request->id_chat")
+            ->where('chat_usuarios.id_usuario', Auth::user()->id)
+            ->select('chats.*')
+            ->get()->first();
+
         if (empty($chat))
             return redirect()->route('chat.index');
 
+        $data_to_select=[
+            'id_usuario',
+            'mensaje as message',
+            'archivo_mensaje as files',
+            'created_at as date',
+            'created_at as time',
+        ];
+
+        // Numero de mensajes a mostrar
+        $number_msgs = 30;
+
+        // Retornar los mensajes en formato JSON
+        if ($request->ajax() && $request->header("x-type") == "message") {
+            $mensajes = Mensajes::with('getUser')
+                ->select($data_to_select)
+                ->where('id_chat', "$chat->id")
+                ->orderBy('id', 'DESC')
+                ->simplePaginate($number_msgs);
+            return response()->json($mensajes);
+        }
+
         // Buscar los ultimos mensajes del chat
-        $mensajes = Mensajes::with('getUser')->where('id_chat', "$chat->id")->orderBy('created_at')->paginate(30);
+        $mensajes = Mensajes::with('getUser')
+            ->where('id_chat', "$chat->id")
+            ->orderBy('id', 'DESC')
+            ->simplePaginate($number_msgs);
+        // Aplicar un reverse a los mensajes
+        $mensajes = $mensajes->setCollection(
+            $mensajes->getCollection()->reverse()
+        );
 
         return view('chat.conversacion.index', compact('mensajes', 'chat'));
     }
 
     function sendMessage(Request $request)
     {
-        $request->validate(['message' => 'required|string']);
+        // $request->validate(['message' => 'required|string']);
 
         $user = Auth::user();
         $message = $request->input('message');
@@ -170,17 +205,22 @@ class ChatController extends Controller
 
         $files_list = implode(',', $files_list);
 
-        $mensaje = Mensajes::create([
-            'id_chat' => $id_chat,
-            'id_usuario' => Auth::user()->id,
-            'mensaje' => $message,
-            'tipo_mensaje' => $message,
-            'archivo_mensaje' => $files_list
-        ]);
+        try {
+            $mensaje = Mensajes::create([
+                'id_chat' => $id_chat,
+                'id_usuario' => Auth::user()->id,
+                'mensaje' => $message,
+                'tipo_mensaje' => 'message',
+                'archivo_mensaje' => $files_list
+            ]);
 
-        event(new MessageSent($user, $mensaje));
+            event(new MessageSent($user, $mensaje));
 
-        return response()->json(['status' => 'Message sent!']);
+            return response()->json(['status' => 201, 'message' => 'created']);
+        } catch (\Throwable $th) {
+            // return response()->json(['status' => 400, 'message' => $th->getMessage()], 400);
+            return response()->json(['status' => 400, 'message' => 'error'], 400);
+        }
     }
 
 

@@ -5,14 +5,9 @@
 
       <ul class="flex flex-col gap-2 p-2">
         @forelse($chats as $chat)
-        @php
-        $rgb = rand(0,255).",".rand(0,255).",".rand(0,255);
-        @endphp
         <li class="hover:bg-gray-600 rounded-xl p-2 flex gap-2 justify-between">
           <a href="{{route('chat.conversacion',$chat->id)}}" class="w-full flex justify-start items-center gap-2">
-            <div class="rounded-full p-1 w-8 h-8 flex justify-center items-center" style="background-color:rgb({{$rgb}});">
-              {{$chat->nombre[0]}}
-            </div>
+            <x-mensajes.user-icon :nombre="$chat->nombre" size="8" />
             <span>{{$chat->nombre}}</span>
           </a>
           <flux:dropdown position="bottom" align="end">
@@ -74,14 +69,9 @@
           <span id="send_to_span">Enviar un nuevo mensaje a</span>
           <ul class="flex flex-col gap-2 p-2" id="users_list">
             @forelse($usuarios as $usuario)
-            @php
-            $rgb = rand(0,255).",".rand(0,255).",".rand(0,255);
-            @endphp
             <li data-userid="{{$usuario->id}}" data-username="{{$usuario->name}}" class="hover:bg-gray-600 rounded-xl cursor-pointer">
               <a href="{{route('chat.registrar',$usuario->id)}}" class="p-2 flex justify-start items-center gap-2">
-                <div class="rounded-full p-1 w-8 h-8 flex justify-center items-center" style="background-color:rgb({{$rgb}});">
-                  {{$usuario->name[0]}}
-                </div>
+                <x-mensajes.user-icon :nombre="$usuario->name" size="8" />
                 <span>{{$usuario->name}}</span>
               </a>
             </li>
@@ -125,7 +115,7 @@
           document.querySelector("#send_to_span").textContent = 'Seleccione los usuarios para crear grupo'
           target.closest('[id=create_chat_group]').classList.add('hidden')
           document.querySelector("#name_chat_group").classList.remove('hidden')
-          
+
           document.querySelector("#users_list").querySelectorAll("a").forEach(e => {
             e.setAttribute('data-href', e.href)
             e.removeAttribute('href')
