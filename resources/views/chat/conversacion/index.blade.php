@@ -1,10 +1,13 @@
 <x-layouts.app :title="__('Dashboard')">
   <link rel="stylesheet" href="{{asset('/ckeditor5/ckeditor5.css')}}">
+  @php
+  $fecha=[];
+  @endphp
 
   <dialog closedBy="any" id="modal_chat_files" class="overflow-hidden rounded-xl w-[85%] md:w-[70%] h-[80dvh]">
     <div class="grid grid-rows-[40px_1fr] p-2 gap-2">
       <div class="flex items-center justify-end">
-        <button type="button" id="btn_close_chat_file"  class="bg-red-500 p-1 rounded-md cursor-pointer text-white flex justify-center items-center">
+        <button type="button" id="btn_close_chat_file" class="bg-red-500 p-1 rounded-md cursor-pointer text-white flex justify-center items-center">
           <flux:icon.x />
         </button>
       </div>
@@ -27,7 +30,19 @@
     <div id="messages" class="overflow-y-auto flex flex-col gap-4  relative scroll-smooth">
       <div class="overflow-hidden hidden" inert hidden>{{$mensajes->links()}}</div>
       <x-mensajes.loader-spinner />
+
       @forelse($mensajes as $mensaje)
+      @php
+      $tmpfecha=$mensaje->created_at->format('d M Y');
+      @endphp
+
+      @if(!in_array($tmpfecha,$fecha))
+      @php
+      $fecha[]=$tmpfecha;
+      @endphp
+      <x-mensajes.pill-chat-time :fecha="$tmpfecha" />
+      @endif
+
       @if($mensaje->id_usuario!=\Auth::user()->id)
       <x-mensajes.left-mensaje :mensaje="$mensaje" />
       @else

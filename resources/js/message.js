@@ -237,10 +237,25 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }).then(res => res.json()).then(res => {
       const tmps = new DocumentFragment()
+      let fecha = {}
 
       res.data.reverse().forEach(data => {
 
         nextUrl = res?.next_page_url
+        let tmptime = generateDateToPill(data.date)
+
+        if (!fecha[tmptime]) {
+          fecha[tmptime] = tmptime
+          const pill1 = document.createElement('div')
+          pill1.className = 'flex justify-center items-center m-auto w-fit text-[10px] bg-gray-300 border-2 border-gray-200/40 text-zinc-950 px-2 py-1 rounded-2xl  z-50 sticky inset-[0px_0px_auto_0px]'
+          pill1.dataset.pilltime = tmptime
+
+          if (document.querySelector(`[data-pilltime='${tmptime}']`))
+            document.querySelector(`[data-pilltime='${tmptime}']`).remove()
+
+          pill1.innerHTML = `<span>${tmptime}</span>`
+          tmps.appendChild(pill1)
+        }
 
         tmps.appendChild(generateMessageBubble({
           date: data.date,
@@ -385,6 +400,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     return messageWrapper
 
+  }
+
+  function generateDateToPill(dateTime) {
+    const isoString = dateTime;
+    const date_time = new Date(isoString);
+
+    return new Intl.DateTimeFormat('es-VE', {
+      dateStyle: 'medium',
+    }).format(date_time);
   }
 
 })

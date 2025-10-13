@@ -1,5 +1,10 @@
 # Laravel Chat-app
 
+## Version 0.0.201 13-OCT-2025
++ Añadi un componente __Blade__ que tiene la funcion de mostrar la fecha de un grupo de mensajes, trate de colocar la logica dentro del mismo, pero el __scope__ de laravel con __Blade__ no funciona como crei, por eso la deje en el mismo archivo desde donde lo importo y me limite a simplemente requerir la fecha como parametro.
++ Tambien agregue esa funcionalidad al hacer fetch de los mensajes anteriores en la logica del cliente.
++ En cada push request que hago se "ejecutan" los github actions, notificandome que fallan, por lo que cambie el nombre de los actions.
+
 ## Version 0.0.2 10-OCT-2025
 En esta actualizacion se agregaron funcionalidades y se modificaron/migraron otras.
 
